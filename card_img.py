@@ -29,15 +29,51 @@ import cv2
 ###############################################################################
 
 def rectify(h):
+
+  # This is a cool trick that I think deserves a proper explanation.
+  #
+  # Organize the flat array of x- and y-components of the vertices of a square,
+  #  h = [x1, y1, x2, y2, x3, y3, x4, y4], into an array of tuples, where each
+  #  tuple is the coordinates of a vertex, putting the vertices in
+  #  counter-clockwise order, starting with the bottom-left vertex.
+
+  # First, reshape the flat array h into the 2-d array shown below. Note the
+  #  difference in using sum() with axis=0 (works along the column) vs.
+  #  axis=1 (works along the row).
+  #
+  #  array.sum(axis=1) = [x1+y1, x2+y2, x3+y3, x4+y4]
+  #      -------->
+  #
+  #      [[x1,y1],   |
+  #       [x2,y2],   | array.sum(axis=0) =  [x1+x2+x3+x4, y1+y2+y3+y4]
+  #       [x3,y3],   |
+  #       [x4,y4]]   V
+  #
   h = h.reshape((4,2))
+
+  # Initialize a new array of zeroes of the same shape.
   hnew = np.zeros((4,2),dtype = np.float32)
 
+  # Create an array, add = [x1+y1, x2+y2, x3+y3, x4+y4], where the entries are
+  #  the the result of summing entries of the 2-d array along axis=1
+  #  (the y-axis).
   add = h.sum(1)
+
+  # The bottom-left corner has the smallest sum of x- and y-coordinates (xi+yi).
   hnew[0] = h[np.argmin(add)]
+
+  # The upper-right corner has the largest sum of x- and y-coordinates (xi+yi).
   hnew[2] = h[np.argmax(add)]
 
+  # Create an array, diff = [y1-x1, y2-x2, y3-x3, y4-x4], where the entries
+  #  are the result of taking difference in entries of the 2-d array along
+  #  axis=1.
   diff = np.diff(h,axis = 1)
+
+  # The bottom-right corner has the largest negative difference in its x- and y-coordinates (yi-xi).
   hnew[1] = h[np.argmin(diff)]
+
+  # The upper-left corner has the largest positive difference in its x- and y-coordinates (yi-xi).
   hnew[3] = h[np.argmax(diff)]
 
   return hnew
