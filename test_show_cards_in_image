@@ -1,0 +1,5 @@
+#!/bin/bash
+
+i=$1
+
+bash show_cards_in_image --image "test$i.jpg" --numCards "$i"
